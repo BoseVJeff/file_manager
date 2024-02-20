@@ -1,13 +1,45 @@
 import 'dart:io';
 
+import 'package:file_manager/database/db.dart';
+import 'package:file_manager/files/scanner.dart';
+import 'package:file_manager/providers/settings_provider.dart';
+import 'package:file_manager/providers/title_provider.dart';
+import 'package:file_manager/router/router.dart';
 import 'package:flutter/material.dart';
-import 'package:sqlite3/sqlite3.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  debugPrint(
-    "Using SQLite version ${sqlite3.version} from ${Platform.resolvedExecutable}",
-  );
-  runApp(const MyApp());
+void main() async {
+  // debugPrint(
+  //   // "Using SQLite version ${sqlite3.version} from ${Uri.parse(Platform.resolvedExecutable).pathSegments.join(' | ')}",
+  //   "Using SQLite version ${sqlite3.version} from ${Uri.parse(Platform.resolvedExecutable).scheme}",
+  // );
+  DB db = DB();
+  debugPrint("Creating database at ${db.dbPath}");
+
+  Scanner scanner = Scanner(
+      "C:/Users/jeffb/Desktop/dev/flutter/file_manager/build/windows/x64/runner/Debug");
+
+  List<FileSystemEntity> list = await scanner.scan();
+
+  Iterable<String> names =
+      list.where((element) => element is! Directory).map((e) => e.path);
+
+  debugPrint(names.join("\n"));
+
+  try {
+    runApp(
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<TitleProvider>(create: (_) => TitleProvider()),
+          ChangeNotifierProvider<SettingsProvider>(
+              create: (_) => SettingsProvider()),
+        ],
+        child: const MyApp(),
+      ),
+    );
+  } finally {
+    db.dispose();
+  }
 }
 
 class MyApp extends StatelessWidget {
@@ -15,73 +47,31 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'File Manager',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
+    return Consumer<TitleProvider>(builder: (
+      BuildContext context,
+      TitleProvider titleProvider,
+      Widget? child,
+    ) {
+      return MaterialApp.router(
+        title: titleProvider.title,
+        theme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepPurple,
+            brightness: Brightness.light,
+          ),
+          useMaterial3: true,
           brightness: Brightness.light,
         ),
-        useMaterial3: true,
-        brightness: Brightness.light,
-      ),
-      darkTheme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
+        darkTheme: ThemeData(
+          colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepPurple,
+            brightness: Brightness.dark,
+          ),
+          useMaterial3: true,
           brightness: Brightness.dark,
         ),
-        useMaterial3: true,
-        brightness: Brightness.dark,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
-    );
-  }
-}
-
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
+        routerConfig: goRouter,
+      );
     });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: Text(widget.title),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ),
-    );
   }
 }
