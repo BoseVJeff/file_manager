@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_manager/utils.dart';
 import 'package:file_manager/database/db.dart';
 import 'package:file_manager/files/scanner.dart';
 import 'package:file_manager/providers/settings_provider.dart';
@@ -21,8 +22,9 @@ void main() async {
 
   List<FileSystemEntity> list = await scanner.scan();
 
-  Iterable<String> names =
-      list.where((element) => element is! Directory).map((e) => e.path);
+  Iterable<String> names = list
+      // .where((element) => element is! Directory)
+      .map((e) => "[${e.runtimeType}] ${e.path}");
 
   debugPrint(names.join("\n"));
 

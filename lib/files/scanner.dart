@@ -20,7 +20,10 @@ class Scanner {
 
       Directory directory = Directory(path);
 
-      return await directory.list(recursive: true, followLinks: false).toList();
+      List<FileSystemEntity> list =
+          await directory.list(recursive: true, followLinks: false).toList();
+
+      return list;
     }
   }
 }
