@@ -44,6 +44,7 @@ dependencies:
   url_launcher: ^6.2.5
   filepicker_windows: ^2.1.0
   mime: ^1.0.5
+  logging: ^1.2.0
 
 dev_dependencies:
   flutter_test:
