@@ -1,5 +1,6 @@
 import 'package:file_manager/routes/app_shell.dart';
 import 'package:file_manager/routes/home.dart';
+import 'package:file_manager/utils/go_router_observer.dart';
 import 'package:go_router/go_router.dart';
 
 class AppRouter {
@@ -10,6 +11,9 @@ class AppRouter {
   AppRouter._init();
 
   static GoRouter goRouter = GoRouter(
+    observers: [
+      GoRouterObeserver(),
+    ],
     initialLocation: '/',
     routes: [
       ShellRoute(

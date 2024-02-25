@@ -1,9 +1,32 @@
 import 'package:file_manager/providers/title_provider.dart';
 import 'package:file_manager/singletons/app_router.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
 void main() {
+  if (kDebugMode) {
+    Logger.root.level = Level.ALL;
+  } else {
+    Logger.root.level = Level.WARNING;
+  }
+
+  // Record logs
+  Logger.root.onRecord.listen((LogRecord record) {
+    debugPrint(
+        "[${record.loggerName}] [${record.level.name}] [${record.time}] ${record.message}");
+    if (record.error != null) {
+      debugPrint("Error: ${record.error}\nStacktrace:\n${record.stackTrace}");
+    }
+  });
+
+  // Setting upp app and logging
+  Logger logger = Logger("main");
+  PlatformDispatcher.instance.onError = (exception, stackTrace) {
+    logger.severe("Unhandled error in root isolate!", exception, stackTrace);
+    return false;
+  };
   runApp(
     MultiProvider(
       builder: (context, child) {
