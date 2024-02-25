@@ -1,7 +1,7 @@
 class FileDatabase {
-  static final FileDatabase _fileDatabase = FileDatabase._internal();
+  static final FileDatabase _fileDatabase = FileDatabase._init();
 
   factory FileDatabase() => FileDatabase._fileDatabase;
 
-  FileDatabase._internal() {}
+  FileDatabase._init() {}
 }
