@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_manager/providers/database_provider.dart';
 import 'package:file_manager/utils.dart';
 import 'package:file_manager/database/db.dart';
 import 'package:file_manager/files/scanner.dart';
@@ -7,6 +8,7 @@ import 'package:file_manager/providers/settings_provider.dart';
 import 'package:file_manager/providers/title_provider.dart';
 import 'package:file_manager/router/router.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -14,19 +16,21 @@ void main() async {
   //   // "Using SQLite version ${sqlite3.version} from ${Uri.parse(Platform.resolvedExecutable).pathSegments.join(' | ')}",
   //   "Using SQLite version ${sqlite3.version} from ${Uri.parse(Platform.resolvedExecutable).scheme}",
   // );
-  DB db = DB();
-  debugPrint("Creating database at ${db.dbPath}");
+  // DB db = DB();
+  // debugPrint("Creating database at ${db.dbPath}");
 
-  Scanner scanner = Scanner(
-      "C:/Users/jeffb/Desktop/dev/flutter/file_manager/build/windows/x64/runner/Debug");
+  // Scanner scanner = Scanner(
+  //     "C:/Users/jeffb/Desktop/dev/flutter/file_manager/build/windows/x64/runner/Debug");
 
-  List<FileSystemEntity> list = await scanner.scan();
+  // List<FileSystemEntity> list = await scanner.scan();
 
-  Iterable<String> names = list
-      // .where((element) => element is! Directory)
-      .map((e) => "[${e.runtimeType}] ${e.path}");
+  // Iterable<String> names = list
+  //     // .where((element) => element is! Directory)
+  //     .map((e) => "[${e.runtimeType}] ${e.path}");
 
-  debugPrint(names.join("\n"));
+  // debugPrint(names.join("\n"));
+
+  debugPrint(rootPrefix(Platform.resolvedExecutable));
 
   try {
     runApp(
@@ -34,13 +38,18 @@ void main() async {
         providers: [
           ChangeNotifierProvider<TitleProvider>(create: (_) => TitleProvider()),
           ChangeNotifierProvider<SettingsProvider>(
-              create: (_) => SettingsProvider()),
+            create: (_) => SettingsProvider(),
+            lazy: false,
+          ),
+          ChangeNotifierProvider<DatabaseProvider>(
+            create: (_) => DatabaseProvider(),
+          ),
         ],
         child: const MyApp(),
       ),
     );
   } finally {
-    db.dispose();
+    // db.dispose();
   }
 }
 

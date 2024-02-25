@@ -35,6 +35,9 @@ class DirectoryViewer extends StatelessWidget {
             itemBuilder: (BuildContext context, int index) {
               FileSystemEntity entity = provider.fileEntities[index];
               return ListTile(
+                leading: (entity is Directory)
+                    ? const Icon(Icons.folder)
+                    : const Icon(Icons.file_open),
                 title: Text(basename(entity.path)),
                 subtitle: Text(entity.path),
                 onTap: (FileSystemEntity.isDirectorySync(entity.path))

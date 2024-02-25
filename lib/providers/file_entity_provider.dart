@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:file_manager/database/db.dart';
 import 'package:flutter/foundation.dart';
 
 class FileEntityProvider extends ChangeNotifier {
@@ -7,8 +8,12 @@ class FileEntityProvider extends ChangeNotifier {
 
   String _parentPath = "";
 
-  FileEntityProvider(String path) {
-    _parentPath = path;
+  final DB _db;
+
+  FileEntityProvider(String path, DB db)
+      : _db = db,
+        _parentPath = path {
+    debugPrint("Using DB at ${_db.dbPath}");
   }
 
   Future<void> scanDirectory(bool followLinks) async {
@@ -24,6 +29,7 @@ class FileEntityProvider extends ChangeNotifier {
           followLinks: false,
         )) {
           fileEntities.add(entity);
+          _db.addFileSystemEntity(entity);
           notifyListeners();
         }
         break;

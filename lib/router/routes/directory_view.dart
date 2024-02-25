@@ -1,3 +1,4 @@
+import 'package:file_manager/providers/database_provider.dart';
 import 'package:file_manager/providers/file_entity_provider.dart';
 import 'package:file_manager/router/routes/directory_viewer.dart';
 import 'package:flutter/material.dart';
@@ -19,16 +20,18 @@ class DirectoryView extends StatelessWidget {
     debugPrint("Using $path");
     try {
       return ChangeNotifierProvider(
-        create: (_) => FileEntityProvider(path),
+        create: (_) =>
+            FileEntityProvider(path, context.read<DatabaseProvider>().db),
         builder: (context, child) => const DirectoryViewer(),
       );
-    } on FileNotFoundException catch (e) {
+    } on FileNotFoundException {
       return Center(child: Text("$path not found!"));
-    } on UnimplementedFileTypeException catch (e) {
+    } on UnimplementedFileTypeException {
       return Center(
         child: Text("$path is not a file, directory, or link!"),
       );
-    } on Exception catch (e) {
+    } on Exception catch (e, s) {
+      debugPrint(s.toString());
       return Center(
         child: Text(
           e.toString(),
