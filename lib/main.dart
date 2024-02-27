@@ -1,11 +1,15 @@
+import 'dart:io';
+
+import 'package:file_manager/providers/settings_provider.dart';
 import 'package:file_manager/providers/title_provider.dart';
 import 'package:file_manager/singletons/app_router.dart';
+import 'package:file_manager/singletons/file_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
 import 'package:provider/provider.dart';
 
-void main() {
+void main() async {
   if (kDebugMode) {
     Logger.root.level = Level.ALL;
   } else {
@@ -27,6 +31,12 @@ void main() {
     logger.severe("Unhandled error in root isolate!", exception, stackTrace);
     return false;
   };
+
+  // FileDatabase fileDatabase = FileDatabase();
+  // await fileDatabase.addDirectoryContentsToFile(
+  //     Directory(r'C:\Users\jeffb\Desktop\dev\flutter\file_manager\'));
+  // fileDatabase.dispose();
+
   runApp(
     MultiProvider(
       builder: (context, child) {
@@ -34,6 +44,7 @@ void main() {
       },
       providers: [
         ChangeNotifierProvider(create: (_) => TitleProvider()),
+        ChangeNotifierProvider(create: (_) => SettingsProvider()),
       ],
     ),
   );
