@@ -1,10 +1,8 @@
-import 'package:file_manager/providers/settings_provider.dart';
 import 'package:file_manager/providers/title_provider.dart';
 import 'package:file_manager/singletons/file_database.dart';
 import 'package:file_manager/utils/db_scan_path.dart';
 import 'package:file_manager/utils/static_dynamic_listview.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -66,6 +64,12 @@ class _SettingsState extends State<Settings> {
                   // });
                   await _fileDatabase
                       .insertPath(_textEditingController.value.text);
+                  // await compute<String, void>(
+                  //   (String message) async {
+                  //     await _fileDatabase.insertPath(message);
+                  //   },
+                  //   _textEditingController.value.text,
+                  // );
                   context.pushReplacement('/settings');
                 },
                 icon: const Icon(Icons.add),
