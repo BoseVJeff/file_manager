@@ -8,6 +8,7 @@ class StaticDynamicListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView.builder(
+      physics: const AlwaysScrollableScrollPhysics(),
       itemCount: children.length,
       itemBuilder: (_, index) {
         return children.elementAt(index);

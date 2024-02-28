@@ -6,6 +6,7 @@ class DbFile {
   final String filePath;
   final String? mimeType;
   final String fileHash;
+  final int? scanPath;
 
   const DbFile(
     this.id,
@@ -13,6 +14,7 @@ class DbFile {
     this.filePath,
     this.mimeType,
     this.fileHash,
+    this.scanPath,
   );
 
   /// Assumes that the row is a result of `SELECT * FROM tbl_file ...`
@@ -22,6 +24,7 @@ class DbFile {
         row.columnAt(2),
         row.columnAt(3),
         row.columnAt(4),
+        row.columnAt(5),
       );
 
   static Iterable<DbFile> fromRows(ResultSet resultSet) => resultSet.map(

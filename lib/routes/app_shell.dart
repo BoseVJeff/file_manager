@@ -22,18 +22,18 @@ class AppShell extends StatelessWidget {
             title: provider.title,
             actions: provider.appbarActions(context),
             backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-            leading: IconButton(
-              onPressed: () {
-                try {
-                  context.pop();
-                } on Exception catch (e, s) {
-                  _logger.warning("Exception: There is nothing to pop!", e, s);
-                } on Error catch (e, s) {
-                  _logger.warning("Error: There is nothing to pop!", e, s);
-                }
-              },
-              icon: const Icon(Icons.arrow_back),
-            ),
+            // leading: IconButton(
+            //   onPressed: () {
+            //     try {
+            //       context.pop(context);
+            //     } on Exception catch (e, s) {
+            //       _logger.warning("Exception: There is nothing to pop!", e, s);
+            //     } on Error catch (e, s) {
+            //       _logger.warning("Error: There is nothing to pop!", e, s);
+            //     }
+            //   },
+            //   icon: const Icon(Icons.arrow_back),
+            // ),
             // leading: (AppRouter.goRouter.canPop())
             //     ? IconButton(
             //         onPressed: () {
@@ -43,7 +43,15 @@ class AppShell extends StatelessWidget {
             //       )
             //     : null,
           ),
-          body: child,
+          body: (child != null)
+              ? RefreshIndicator(
+                  child: child,
+                  onRefresh: () async {
+                    _logger.fine("Refreshing route");
+                    GoRouter.of(context).refresh();
+                  },
+                )
+              : null,
           floatingActionButton: provider.fab,
           bottomNavigationBar: provider.bottomBarChild,
         );

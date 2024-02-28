@@ -26,6 +26,7 @@ class TitleProvider extends ChangeNotifier {
 
   List<(Icon routeIcon, String route, String? routeName)> actionsList = [
     (const Icon(Icons.settings), '/settings', 'Settings'),
+    (const Icon(Icons.search), '/search', 'Search'),
   ];
 
   List<Widget> appbarActions(BuildContext context) {
@@ -34,7 +35,7 @@ class TitleProvider extends ChangeNotifier {
       list.add(
         IconButton(
           onPressed: () async {
-            await context.push(element.$2);
+            context.pushReplacement(element.$2);
           },
           icon: element.$1,
           tooltip: element.$3,

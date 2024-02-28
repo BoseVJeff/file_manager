@@ -51,10 +51,10 @@ class _SearchState extends State<Search> {
   Widget build(BuildContext context) {
     if (!isFabSet) {
       Future.delayed(Duration.zero, () {
-        context.read<TitleProvider>().fab = FloatingActionButton(
-          onPressed: () {},
-          child: const Icon(Icons.search),
-        );
+        // context.read<TitleProvider>().fab = FloatingActionButton(
+        //   onPressed: () {},
+        //   child: const Icon(Icons.search),
+        // );
 
         context.read<TitleProvider>().bottomBarChild = SizedBox(
           height: 56,
