@@ -43,15 +43,7 @@ class AppShell extends StatelessWidget {
             //       )
             //     : null,
           ),
-          body: (child != null)
-              ? RefreshIndicator(
-                  child: child,
-                  onRefresh: () async {
-                    _logger.fine("Refreshing route");
-                    GoRouter.of(context).refresh();
-                  },
-                )
-              : null,
+          body: child,
           floatingActionButton: provider.fab,
           bottomNavigationBar: provider.bottomBarChild,
         );
