@@ -2,6 +2,7 @@ import 'package:file_manager/providers/title_provider.dart';
 import 'package:file_manager/singletons/file_database.dart';
 import 'package:file_manager/utils/db_scan_path.dart';
 import 'package:file_manager/utils/static_dynamic_listview.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
@@ -64,11 +65,15 @@ class _SettingsState extends State<Settings> {
                   // });
                   await _fileDatabase
                       .insertPath(_textEditingController.value.text);
+                  // final String searchString =
+                  //     _textEditingController.value.text.toString();
                   // await compute<String, void>(
                   //   (String message) async {
-                  //     await _fileDatabase.insertPath(message);
+                  //     await _fileDatabase.insertPath(message.toString());
+                  //     // print(message);
                   //   },
-                  //   _textEditingController.value.text,
+                  //   "$searchString",
+                  //   debugLabel: 'InsertDirIntoDbCompute',
                   // );
                   context.pushReplacement('/settings');
                 },
