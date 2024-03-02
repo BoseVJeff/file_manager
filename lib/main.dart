@@ -1,9 +1,8 @@
-import 'package:file_manager/providers/app_settings_provider.dart';
-import 'package:file_manager/providers/file_database_provider.dart';
+import 'package:file_manager/routes/app_router.dart';
+import 'package:file_manager/utils/parsed_args.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:logging/logging.dart';
-import 'package:provider/provider.dart';
 
 void main(List<String> args) {
   if (kDebugMode) {
@@ -19,16 +18,18 @@ void main(List<String> args) {
     }
     // TODO: Deal with logs in production mode.
   });
-  runApp(const FileManagerApp());
+  runApp(FileManagerApp(args: args));
 }
 
 class FileManagerApp extends StatelessWidget {
-  const FileManagerApp({super.key});
+  final List<String> args;
+
+  const FileManagerApp({super.key, required this.args});
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Flutter Demo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -47,7 +48,8 @@ class FileManagerApp extends StatelessWidget {
         useMaterial3: true,
       ),
       themeMode: ThemeMode.system,
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      routerConfig: AppRouter(ParsedArgs.fromArgs(args)).goRouter,
+      // home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }

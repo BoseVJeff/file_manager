@@ -1,5 +1,8 @@
+import 'package:file_manager/providers/app_settings_provider.dart';
+import 'package:file_manager/providers/file_database_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 class RouteShell extends StatelessWidget {
   final GoRouterState state;
@@ -13,6 +16,16 @@ class RouteShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return child;
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AppSettingsProvider>(
+          create: (_) => AppSettingsProvider(),
+        ),
+        ChangeNotifierProvider<FileDatabaseProvider>(
+          create: (_) => FileDatabaseProvider(),
+        ),
+      ],
+      child: child,
+    );
   }
 }
