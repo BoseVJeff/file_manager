@@ -5,7 +5,9 @@ import 'package:file_manager/utils/static_dynamic_listview.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:path/path.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Search extends StatefulWidget {
   const Search({super.key});
@@ -76,6 +78,9 @@ class _SearchState extends State<Search> {
         (e) => ListTile(
           title: Text(e.filePath),
           subtitle: Text(e.fileDriveRoot),
+          onTap: () async {
+            launchUrl(Uri.parse(join(e.fileDriveRoot, e.filePath)));
+          },
         ),
       ),
     );
