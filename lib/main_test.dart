@@ -2,9 +2,13 @@ import 'dart:async';
 
 import 'package:file_manager/providers/file_database_provider.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:logging/logging.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 Future<void> main(List<String> args) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (kDebugMode) {
     Logger.root.level = Level.ALL;
   } else {
@@ -19,8 +23,12 @@ Future<void> main(List<String> args) async {
     // TODO: Deal with logs in production mode.
   });
   FileDatabaseProvider fileDatabaseProvider = FileDatabaseProvider();
-  await fileDatabaseProvider
-      .scanForFiles(r"C:\Users\jeffb\Desktop\dev\flutter\file_manager\lib\");
+
+  await fileDatabaseProvider.scanForFilesCompute(
+      r"C:\Users\jeffb\Desktop\dev\flutter\file_manager\lib\");
+
+  // await fileDatabaseProvider
+  //     .scanForFiles(r"C:\Users\jeffb\Desktop\dev\flutter\file_manager\lib\");
 
   // await compute<String, void>(
   //   (message) async {
@@ -31,5 +39,7 @@ Future<void> main(List<String> args) async {
   // );
 
   fileDatabaseProvider.dispose();
+
+  print(await launchUrl(Uri.parse(r"C:\Users\jeffb\Downloads\download.csv")));
   return;
 }
