@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS tbl_path (
   path_id INTEGER PRIMARY KEY AUTOINCREMENT,
   path TEXT,
   path_scanned_on_date TEXT DEFAULT CURRENT_TIMESTAMP
-);""",
+);
+""",
       """
 CREATE TABLE IF NOT EXISTS tbl_file (
   file_id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -84,32 +85,13 @@ CREATE TABLE IF NOT EXISTS tbl_file (
         "Initialising database ${(databasePath == null) ? 'in memory' : 'at $databasePath'}");
     _logger.info("Present database version: ${_database.userVersion}");
 
-//     _dbMigrationStmts = {
-//       0: _database.prepareMultiple("""
-// CREATE TABLE IF NOT EXISTS tbl_path (
-//   path_id INTEGER PRIMARY KEY AUTOINCREMENT,
-//   path TEXT,
-//   path_scanned_on_date TEXT DEFAULT CURRENT_TIMESTAMP
-// );
-// CREATE TABLE IF NOT EXISTS tbl_file (
-//   file_id INTEGER PRIMARY KEY AUTOINCREMENT,
-//   file_drive_root TEXT,
-//   file_full_path TEXT,
-//   file_mime_type TEXT,
-//   file_hash TEXT,
-//   path_id INTEGER REFERENCES tbl_path ON DELETE CASCADE
-// );
-// """),
-//     };
-    // _dbMigrationStmts =
-    //     dbMigrationSql.map<int, List<PreparedStatement>>((key, value) {
-    //   List<PreparedStatement> list = [];
-    //   for (String sql in value) {
-    //     list.add(_database.prepare(sql));
-    //   }
-    //   return MapEntry<int, List<PreparedStatement>>(key, list);
-    // });
+    _logger
+        .config("Migrating Database from ${_database.userVersion} to latest");
+    migrateDbToLatest();
   }
+
+  // This method is mainly used for
+  int get databaseVersion => _database.userVersion;
 
   /// This migrates the existing DB to the current version and then sets the current version to the version it was updated to.
   ///
@@ -131,6 +113,7 @@ CREATE TABLE IF NOT EXISTS tbl_file (
     }
 
     int i = currentVersion;
+    // If the database is already at latest, this loop gets skipped over and nothing gets done
     while (dbMigrationSql.containsKey(i)) {
       // Putting a null check here as this is checked in the parent `if` statement
       for (String sql in dbMigrationSql[i]!) {
