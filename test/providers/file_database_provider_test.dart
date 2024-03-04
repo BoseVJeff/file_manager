@@ -25,7 +25,7 @@ void main() {
   });
 
   group('Database Migration Queries', () {
-    test('Zero-to-Hero Migration', () {
+    test('Zero-to-Hero Migration Queries', () {
       // Tests if the query is able to create a database from scratch
 
       Database database = sqlite3.openInMemory();
@@ -49,6 +49,16 @@ void main() {
       } finally {
         database.dispose();
       }
+    });
+
+    test('Zero-to-Hero Migration Flutter', () {
+      FileDatabaseProvider databaseProvider = FileDatabaseProvider();
+
+      // Check that that database is initialised to the latest version
+      expect(
+        databaseProvider.databaseVersion,
+        equals(FileDatabaseProvider.dbMigrationSql.keys.last + 1),
+      );
     });
   });
 }
