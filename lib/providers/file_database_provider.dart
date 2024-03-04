@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS tbl_file (
       }
       i++;
     }
+    _database.userVersion = i;
   }
 
   Future<void> scanForFilesCompute(String path) async {
