@@ -59,6 +59,27 @@ void main() {
         databaseProvider.databaseVersion,
         equals(FileDatabaseProvider.dbMigrationSql.keys.last + 1),
       );
+
+      databaseProvider.dispose();
+    });
+
+    test('Dirty Upgrade', () {
+      Database database = sqlite3.openInMemory();
+      database.execute("CREATE TABLE tbl_file (misc TEXT);");
+      database.execute("CREATE TABLE tbl_path (misc TEXT);");
+
+      database.execute("INSERT INTO tbl_file VALUES ('Text 01 file')");
+      database.execute("INSERT INTO tbl_path VALUES ('Text 01 path')");
+
+      FileDatabaseProvider databaseProvider = FileDatabaseProvider(database);
+
+      expect(
+        database.userVersion,
+        equals(FileDatabaseProvider.dbMigrationSql.keys.last + 1),
+      );
+
+      databaseProvider.dispose();
+      database.dispose();
     });
   });
 }
