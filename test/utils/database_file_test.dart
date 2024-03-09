@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:benchmark_harness/benchmark_harness.dart';
 import 'package:file_manager/utils/database_file.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -84,4 +85,25 @@ void main() {
     expect(databaseFile.mimeType, equals(mimeType));
     expect(databaseFile.hash, pwshHash);
   });
+
+  test('Benchmark', () async {
+    await FileCreationBenchmark.main();
+  });
+}
+
+class FileCreationBenchmark extends AsyncBenchmarkBase {
+  FileCreationBenchmark()
+      : super(
+          "Database File Creation",
+          emitter: const PrintEmitter(),
+        );
+
+  static Future<void> main() async {
+    await FileCreationBenchmark().report();
+  }
+
+  @override
+  Future<void> run() async {
+    await DatabaseFile.fromPath(r"test\utils\database_file_test.dart");
+  }
 }
