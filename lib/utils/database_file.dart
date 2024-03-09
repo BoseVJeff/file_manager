@@ -5,6 +5,7 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:mime/mime.dart';
 import 'package:path/path.dart';
+import 'package:sqlite3/common.dart';
 
 class DatabaseFile {
   /// The full path to the file
@@ -26,7 +27,7 @@ class DatabaseFile {
   /// This is determined by using the filename and the first 256 bytes of the file contents.
   ///
   /// This is null if the mime-type could not be determined.
-  final String mimeType;
+  final String? mimeType;
   final String hash;
 
   const DatabaseFile(
@@ -35,6 +36,27 @@ class DatabaseFile {
     this.mimeType,
     this.hash,
   );
+
+  static Future<DatabaseFile> fromPath(String filePath) async {
+    String fullPath = File(filePath).absolute.path;
+    String path = relative(fullPath, from: rootPrefix(Platform.executable));
+    final String? root = DatabaseFile.getFileDriveRoot(fullPath);
+    List<String?> values = await Future.wait<String?>([
+      getFileMimeType(fullPath),
+      getFileHash(fullPath),
+    ]);
+    final String? mimeType = values[0];
+    final String fileHash = values[1]!;
+
+    return DatabaseFile(path, root, mimeType, fileHash);
+  }
+
+  factory DatabaseFile.fromRow(Row row) => DatabaseFile(
+        row['file_full_path'],
+        row['file_drive_root'],
+        row['file_mime_type'],
+        row['file_hash'],
+      );
 
   static String? getFileDriveRoot(String fullPath) {
     String fileRoot = rootPrefix(fullPath);
@@ -50,6 +72,9 @@ class DatabaseFile {
   ///
   /// Uses the filename and the first [defaultMagicNumbersMaxLength] bytes to make the determination.
   static Future<String?> getFileMimeType(String fullPath) async {
+    if ((await FileSystemEntity.type(fullPath)) != FileSystemEntityType.file) {
+      return null;
+    }
     File file = File(fullPath);
 
     Stream<List<int>> byteStream =
@@ -81,6 +106,7 @@ class DatabaseFile {
 
     Digest digest = output.events.single;
 
-    return digest.toString();
+    // Converting to uppercase here to mantain consistency with how `pwsh.exe` does this on Windows
+    return digest.toString().toUpperCase();
   }
 }
