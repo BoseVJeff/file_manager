@@ -66,4 +66,22 @@ void main() {
       expect(dartHash, equals(pwshHash));
     });
   });
+
+  test('Overall', () async {
+    DatabaseFile databaseFile = await DatabaseFile.fromPath(testFilePath);
+
+    final String pwshHash = ((await Process.run("pwsh.exe", [
+      "-Command",
+      "(Get-FileHash $testFilePath -Algorithm SHA1).Hash",
+    ]))
+            .stdout as String)
+        // The output needs to be trimmed as it returns a `/r/n` at the end
+        .trim();
+
+    const String mimeType = "text/x-dart";
+
+    expect(databaseFile.driveRoot, isNull);
+    expect(databaseFile.mimeType, equals(mimeType));
+    expect(databaseFile.hash, pwshHash);
+  });
 }
