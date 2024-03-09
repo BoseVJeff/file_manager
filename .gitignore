@@ -44,3 +44,6 @@ app.*.map.json
 
 # SQLite libs
 test/providers/sqlite3
+
+# Test coverage info
+coverage/
