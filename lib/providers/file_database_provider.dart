@@ -89,6 +89,8 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
 
   late PreparedStatement _databaseInsertScanPathStatement;
 
+  late PreparedStatement _databaseRemoveScanPathStatement;
+
   // // TODO: Count the rows for each path_id in tbl_files
   // late PreparedStatement _databaseCountFilesFromPath;
 
@@ -117,6 +119,11 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
     _databaseInsertScanPathStatement =
         _database.prepare("INSERT INTO tbl_path (path) VALUES (?)");
 
+    _logger.fine("Preparing path removal statement");
+    _databaseRemoveScanPathStatement =
+        _database.prepare("DELETE FROM tbl_path WHERE path_id=?");
+
+    _logger.fine("Preparing last path id statement");
     _databaseLastPathIdStatement = _database
         .prepare("SELECT path_id FROM tbl_path ORDER BY path_id DESC LIMIT 1;");
 
@@ -187,6 +194,13 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
 
     _logger.info("Returning the last row");
     return _databaseLastPathIdStatement.select([]).first['path_id'];
+  }
+
+  void removeSourcePath(int id) {
+    _logger.info("Removing path with id $id");
+    _databaseRemoveScanPathStatement.execute([id]);
+
+    return;
   }
 
   /// Scans the given `path` and its subdirectories for files that can be added to the database.
