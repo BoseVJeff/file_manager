@@ -14,12 +14,25 @@ class ParsedArgs {
 
   factory ParsedArgs.fromArgs(List<String> args) {
     _logger.fine("Parsing from args --> ${args.join(" ")}");
-    _argParser.addFlag("show-ui", abbr: "i", negatable: true, defaultsTo: true);
-    _argParser.addOption("database-path", abbr: "d", defaultsTo: null);
+    if (_argParser.findByNameOrAlias('show-ui') == null) {
+      _argParser.addFlag(
+        "show-ui",
+        abbr: "i",
+        negatable: true,
+        defaultsTo: true,
+      );
+    }
+    if (_argParser.findByNameOrAlias('database-path') == null) {
+      _argParser.addOption(
+        "database-path",
+        abbr: "d",
+        defaultsTo: null,
+      );
+    }
 
     ArgResults results = _argParser.parse(args);
 
-    _logger.config("Recieved args --> $results");
+    _logger.config("Recieved args --> ${results.arguments.join(" ")}");
 
     return ParsedArgs(results['database-path'], results['show-ui']);
   }
