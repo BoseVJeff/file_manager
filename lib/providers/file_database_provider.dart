@@ -18,6 +18,8 @@ class FileDatabaseProvider extends ChangeNotifier {
   /// The logger for this class
   final Logger _logger = Logger("FileDatabaseProvider");
 
+  late StreamSubscription<SqliteUpdate> updateSubs;
+
   /// List of files that are awating to be scanned into the database
   ///
   /// This is treated akin to a stack where items are popped off as they are scanned into the database.
@@ -104,11 +106,12 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
       : _database = database ?? sqlite3.openInMemory() {
     _logger.info(
         "Initialising database ${(database == null) ? 'in memory' : 'provided'}");
-    _logger.info("Present database version: ${_database.userVersion}");
 
     _logger
         .config("Migrating Database from ${_database.userVersion} to latest");
     migrateDbToLatest();
+
+    _logger.info("Present database version: ${_database.userVersion}");
 
     _logger.fine("Preparing path insertion statement");
     _databaseInsertScanPathStatement =
@@ -116,6 +119,23 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
 
     _databaseLastPathIdStatement = _database
         .prepare("SELECT path_id FROM tbl_path ORDER BY path_id DESC LIMIT 1;");
+
+    updateSubs = _database.updates.listen(sqliteUpdateLogger);
+  }
+
+  void sqliteUpdateLogger(SqliteUpdate update) {
+    switch (update.kind) {
+      case SqliteUpdateKind.insert:
+        _logger.fine("Inserted row ${update.rowId} in ${update.tableName}");
+        break;
+      case SqliteUpdateKind.update:
+        _logger.fine("Updated row ${update.rowId} in ${update.tableName}");
+        break;
+      case SqliteUpdateKind.delete:
+        _logger.fine("Deleted row ${update.rowId} in ${update.tableName}");
+        break;
+    }
+    return;
   }
 
   // This method is mainly used for debugging and testing purposes
@@ -158,6 +178,9 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
     _database.userVersion = i;
   }
 
+  /// Add the path to the `tbl_path` table.
+  ///
+  /// Returns the index where this file was inserted.
   int addSourcePath(String path) {
     _logger.info("Adding path to tbl_path");
     _databaseInsertScanPathStatement.execute([path]);
@@ -314,7 +337,8 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
   }
 
   @override
-  void dispose() {
+  Future<void> dispose() async {
+    await updateSubs.cancel();
     _database.dispose();
     super.dispose();
   }
