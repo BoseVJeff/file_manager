@@ -23,6 +23,7 @@ class RouteShell extends StatelessWidget {
         ),
         ChangeNotifierProvider<FileDatabaseProvider>(
           create: (_) => FileDatabaseProvider(),
+          lazy: false,
         ),
       ],
       child: child,
