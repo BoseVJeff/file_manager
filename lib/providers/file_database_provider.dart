@@ -83,22 +83,14 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
 
   // late PreparedStatement _databaseInsertFileStatement;
 
-  // late PreparedStatement _databaseFileSearchStatement;
-
   // late PreparedStatement _databaseFileDumpStatement;
 
   late PreparedStatement _databaseInsertScanPathStatement;
-
-  late PreparedStatement _databaseRemoveScanPathStatement;
 
   // // TODO: Count the rows for each path_id in tbl_files
   // late PreparedStatement _databaseCountFilesFromPath;
 
   // late PreparedStatement _databasePathDumpStatement;
-
-  // late PreparedStatement _databaseRemovePath;
-
-  // late PreparedStatement _databaseUpdatePath;
 
   // late PreparedStatement _databaseDeletePathChildrenStatement;
 
@@ -118,14 +110,6 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
     _logger.fine("Preparing path insertion statement");
     _databaseInsertScanPathStatement =
         _database.prepare("INSERT INTO tbl_path (path) VALUES (?)");
-
-    _logger.fine("Preparing path removal statement");
-    _databaseRemoveScanPathStatement =
-        _database.prepare("DELETE FROM tbl_path WHERE path_id=?");
-
-    _logger.fine("Preparing last path id statement");
-    _databaseLastPathIdStatement = _database
-        .prepare("SELECT path_id FROM tbl_path ORDER BY path_id DESC LIMIT 1;");
 
     updateSubs = _database.updates.listen(sqliteUpdateLogger);
   }
@@ -185,6 +169,14 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
     _database.userVersion = i;
   }
 
+  /// Adds the path to `tbl_path` and all its results to `tbl_file`.
+  Future<void> addAndScanPath(String path) async {
+    int id = addSourcePath(path);
+    await scanForFilesCompute(path, id);
+    await addScannedFilesToDatabase();
+    return;
+  }
+
   /// Add the path to the `tbl_path` table.
   ///
   /// Returns the index where this file was inserted.
@@ -196,15 +188,72 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
     return _databaseLastPathIdStatement.select([]).first['path_id'];
   }
 
-  void removeSourcePath(int id) {
+  /// Removes the path associated with this id
+  ///
+  /// Thanks to the cascade, this also deletes all files associated with this id.
+  Future<void> removeSourcePath(int id) async {
     _logger.info("Removing path with id $id");
-    _databaseRemoveScanPathStatement.execute([id]);
+    // _databaseRemoveScanPathStatement.execute([id]);
+    Pointer<void> databasePointer = _database.handle;
+
+    await compute<(int id, Pointer<void> pointer), void>(
+      (message) {
+        int pathId;
+        Pointer<void> pointer;
+        (pathId, pointer) = message;
+
+        Database db = sqlite3.fromPointer(pointer);
+
+        db.execute("DELETE FROM tbl_path WHERE path_id=?", [pathId]);
+
+        return;
+      },
+      (id, databasePointer),
+      debugLabel: 'Path Deletion Isolate',
+    );
 
     return;
   }
 
+  /// Returns a list of files that constain the subtring `substring`.
+  ///
+  /// The exact operator used here is `%<substring>%`.
+  Future<Iterable<DatabaseFile>> filterFiles({String? substring}) async {
+    Iterable<DatabaseFile> databaseFiles;
+
+    Pointer<void> dbPointer = _database.handle;
+
+    databaseFiles = await compute<(String substr, Pointer<void> pointer),
+        Iterable<DatabaseFile>>(
+      (str) {
+        String substr;
+        Pointer<void> pointer;
+
+        (substr, pointer) = str;
+
+        Database dbInstance = sqlite3.fromPointer(pointer);
+
+        ResultSet res = dbInstance.select(
+          "SELECT * FROM tbl_file WHERE full_path LIKE '%?%'",
+          [substr],
+        );
+
+        Iterable<DatabaseFile> files =
+            res.map<DatabaseFile>(DatabaseFile.fromRow);
+
+        return files;
+      },
+      (substring ?? '', dbPointer),
+      debugLabel: 'File Filter',
+    );
+
+    return databaseFiles;
+  }
+
   /// Scans the given `path` and its subdirectories for files that can be added to the database.
   /// These files are added to the an internal list of files that are pending to be scanned.
+  ///
+  /// For maximal logical consistency, ensure that the path is eventually added to `tbl_path`.
   ///
   /// Internally, this data is stored as a list of ([FileSystemEntity] entity, [int] pathId) tuples.
   ///
