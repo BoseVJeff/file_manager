@@ -29,7 +29,7 @@ Future<void> main(List<String> args) async {
   FileDatabaseProvider fileDatabaseProvider = FileDatabaseProvider();
 
   await fileDatabaseProvider.scanForFilesCompute(
-      r"C:\Users\jeffb\Desktop\dev\flutter\file_manager\lib\");
+      r"C:\Users\jeffb\Desktop\dev\flutter\file_manager\lib\", 1);
 
   // await fileDatabaseProvider
   //     .scanForFiles(r"C:\Users\jeffb\Desktop\dev\flutter\file_manager\lib\");

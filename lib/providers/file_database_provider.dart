@@ -216,8 +216,8 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
   /// Specifically, the path is added to the `tbl_path` table in the database.
   ///
   /// This method does not check for duplicates, so it is the responsiblity of the caller to ensure that the same path does not get added twice.
-  Future<void> scanForFilesCompute(String path) async {
-    int pathId = addSourcePath(path);
+  Future<void> scanForFilesCompute(String path, int pathId) async {
+    // int pathId = addSourcePath(path);
 
     _logger.info("Scanning $path for files");
 
@@ -271,9 +271,9 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
     );
   }
 
-  Future<void> scanForFiles(String path) async {
-    _logger.fine("Adding $path to database");
-    int pathId = addSourcePath(path);
+  Future<void> scanForFiles(String path, int pathId) async {
+    // _logger.fine("Adding $path to database");
+    // int pathId = addSourcePath(path);
 
     _logger.info("Scanning $path for files");
 
@@ -293,7 +293,7 @@ UPDATE tbl_file SET file_hash=upper(file_hash);
         _filesToBeScanned.add((File(path), pathId));
         break;
       case FileSystemEntityType.link:
-        await scanForFiles(await Link(path).resolveSymbolicLinks());
+        await scanForFiles(await Link(path).resolveSymbolicLinks(), pathId);
         break;
       case FileSystemEntityType.notFound:
         _logger.warning("$path doesnot exist");
