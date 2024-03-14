@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:file_manager/providers/title_provider.dart';
 import 'package:file_manager/singletons/file_database.dart';
 import 'package:file_manager/utils/db_file.dart';
@@ -79,7 +81,9 @@ class _SearchState extends State<Search> {
           title: Text(e.filePath),
           subtitle: Text(e.fileDriveRoot),
           onTap: () async {
-            launchUrl(Uri.parse(join(e.fileDriveRoot, e.filePath)));
+            await launchUrl(Uri.parse(join(e.fileDriveRoot, e.filePath)));
+            debugPrint("Opening app...");
+            return;
           },
         ),
       ),
